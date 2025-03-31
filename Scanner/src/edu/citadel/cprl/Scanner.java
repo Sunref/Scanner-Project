@@ -153,6 +153,7 @@ public class Scanner {
                     // deve ser descartado.
                     
                     // Implementaçao do comentário - Fernanda
+                    // exemplo 0: divisão ou comentário
                     case '/': // se é um caractere /
                         
                         // pode ser que seja duas barras, então
@@ -168,10 +169,9 @@ public class Scanner {
                             // avança o leitor para a próxima linha
                             advance();
                             
-                            // não é uma barra, então é somente o operador de divisão
-                        } else {
+                        } else { // não é uma barra, então é somente o operador de divisão
                             
-                            // sabe-se que é um símbolo do tipo greaterThan
+                            // sabe-se que é um símbolo do tipo divide
                             symbol = Symbol.divide;
                             
                         }
@@ -225,18 +225,108 @@ public class Scanner {
                     //           depois os de dois caracteres.
                     // Obs: lembre-se que a divisão será tratada no
                     // processamento do comentário (primeiro case desse switch).
-                        
-                    // <editor-fold defaultstate="collapsed" desc="Implementação do Passo 03">
-                    
-                    // sua implementação aqui
-                    
-                    // </editor-fold>
 
+                    // Implementaçao da subtração - Fernanda
+                    // exemplo 3: subtração
+                    case '-': // se é um caractere -
                         
+                        // sabe-se que é um símbolo do tipo minus
+                        symbol = Symbol.minus;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;
+                    
+                    // Implementaçao do menor e menor igual - Fernanda
+                    // exemplo 4: menor e menor ou igual
+                    case '<': // se é um caractere <
+                        
+                        // pode ser que seja um menor ou igual, então
+                        // avança mais um caractere para ver se é esse o caso
+                        source.advance();
+                        
+                        // verifica se é um igual
+                        if ( (char) source.getChar() == '=' ) {
+                            
+                            // sabe-se que é um símbolo do tipo lessOrEqual
+                            symbol = Symbol.lessOrEqual;
+                            
+                            // avança o leitor em um caractere
+                            source.advance();
+                            
+                            // não é um igual, então é somente o operador maior
+                        } else {
+                            
+                            // sabe-se que é um símbolo do tipo lessThan
+                            symbol = Symbol.lessThan;
+                            
+                        }
+                        
+                        break;
+                        
+                    // Implementaçao da multiplicação - Fernanda
+                    // exemplo 5: multiplicação
+                    case '*': // se é um caractere *
+                        
+                        // sabe-se que é um símbolo do tipo times
+                        symbol = Symbol.times;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;
+                    
+                    // Implementaçao do diferente de - Fernanda
+                    // exemplo 6: diferente de
+                    case '!': // se é um caractere !
+                        
+                        // pode ser que seja um diferente de
+                        // avança mais um caractere para ver se é esse o caso
+                        source.advance();
+                        
+                        // verifica se é um igual
+                        if ( (char) source.getChar() == '=' ) {
+                            
+                            // sabe-se que é um símbolo do tipo notEqual
+                            symbol = Symbol.notEqual;
+                            
+                            // avança o leitor em um caractere
+                            source.advance();
+                            
+                            // não é um igual, então é soum erro é lançado
+                        } else {
+                            
+                            // gera a mensagem de erro, indicando o caractere
+                            // inválido
+                            String errorMsg = "Invalid character !"
+                                    + ( (char) source.getChar() ) + "!";
+
+                            // avança o leitor em um caractere
+                            source.advance();
+
+                            // lançã o erro
+                            throw error( errorMsg );
+                            
+                        }
+                        
+                        break;
+                        
+                    // Implementaçao do igual - Fernanda
+                    // exemplo 7: igual
+                    case '=': // se é um caractere =
+                        
+                        // sabe-se que é um símbolo do tipo equals
+                        symbol = Symbol.equals;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;
                         
                     // este é o passo 04 da sua implementação, onde deve-se
                     // escanear os literais de caracteres ('a', 'b' etc) e 
-                    // strings ("abc", "", "x" etc).
+                    // strings ("abc", "x" etc).
                         
                     // o método scanCharLiteral já está pronto e o método
                     // scanStringLiteral deve ser implementado. para a
@@ -248,8 +338,6 @@ public class Scanner {
                     // sua implementação aqui
                     
                     // </editor-fold>
-                    
-                                        
                     
                     // erro: caractere inválido
                     default:
@@ -300,8 +388,10 @@ public class Scanner {
      */
     private void skipComment() throws ScannerException, IOException {
         
-        // Como sabemos que é um comentário, podemos pular para o fim da linha
-        //e descartar as informações do comentário - Fernanda
+        // Implementação de pulo de comentário - Fernanda
+        
+        // Como é um comentário, podemos pular para o fim da linha
+        //e descartar as informações do comentário
         skipToEndOfLine();
                 
     }
@@ -328,9 +418,18 @@ public class Scanner {
         
         // Implementação do identificador de palavras reservadas - Fernanda
         
-        
-        // esta linha deve ser alterada para retornar a string do identificador
-        return "";
+        assert Character.isLetter( (char) source.getChar() ) :
+                "scanIntegerLiteral(): check integer literal start for digit at position "
+                + getPosition();
+
+        clearScanBuffer();
+
+        do {
+            scanBuffer.append( (char) source.getChar() );
+            source.advance();
+        } while ( Character.isLetter( (char) source.getChar() ) );
+
+        return scanBuffer.toString();
         
     }
     
@@ -349,15 +448,13 @@ public class Scanner {
      * 
      */
     private Symbol getIdentifierSymbol( String idString ) {
+
+        // Implementação do identificador de simbolo - Fernanda
         
-        // <editor-fold defaultstate="collapsed" desc="Implementação">
-                    
-        // sua implementação aqui
-        
-        // esta linha deve ser alterada para retornar o símbolo apropriado
-        return Symbol.unknown;
-        
-        // </editor-fold>
+        Symbol symbol = symbolMap.get(idString);
+
+        // Retorna o símbolo ou Symbol.unknown se não encontrado
+        return symbol != null ? symbol : Symbol.unknown;
         
     }
 
