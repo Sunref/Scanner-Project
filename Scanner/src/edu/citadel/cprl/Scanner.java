@@ -301,11 +301,8 @@ public class Scanner {
                             
                             // gera a mensagem de erro, indicando o caractere
                             // inválido
-                            String errorMsg = "Invalid character !"
-                                    + ( (char) source.getChar() ) + "!";
-
-                            // avança o leitor em um caractere
-                            source.advance();
+                            String errorMsg = "Invalid character \'"
+                                    + ( "!" ) + "\'";
 
                             // lançã o erro
                             throw error( errorMsg );
@@ -445,6 +442,7 @@ public class Scanner {
                     // implementação do escaneamento de strings, use como base
                     // o escaneamento de caracteres
                     
+                    // Implementaçao do passo 04 - Gabriel
                     //aspa simples( inicio de caractere)
                     case '\'':
                         //marca commo token do tipo char
@@ -612,14 +610,16 @@ public class Scanner {
         String errorMsg = "Invalid String literal.";
         clearScanBuffer();
 
-        // <editor-fold defaultstate="collapsed" desc="Implementação">
+        // Implementacao por - Gabriel
         scanBuffer.append('\"');
         source.advance(); // pula aspas
+        
         // le o conteudo até outras aspas
         while (true) {
             checkEOF(); // checa se do nada o arquivo termina
 
             char c = (char) source.getChar();
+            
             // se achou outras aspas duplas termina
             if (c == '\"') {
                 scanBuffer.append('\"');
@@ -660,44 +660,60 @@ public class Scanner {
      */
     private String scanCharLiteral() throws ScannerException, IOException {
         
-        // assume que source.getChar() são as aspas duplas de abertura do
-        // literal de String.
-        assert (char) source.getChar() == '\"' :
-                "scanStringLiteral(): check for opening double quote (\") at position "
+        // assume que source.getChar() é a aspa simples de abertura
+        // do literal de Char.
+        assert (char) source.getChar() == '\'' :
+                "scanCharLiteral(): check for opening quote (\') at position "
                 + getPosition() + ".";
 
-        String errorMsg = "Invalid String literal.";
+        String errorMsg = "Invalid Char literal.";
         clearScanBuffer();
 
-        scanBuffer.append('\"');
-        source.advance(); // pula aspas
-        
-        // le o conteudo até outras aspas
-        while (true) {
-            checkEOF(); // checa se do nada o arquivo termina
+        // insere a aspa simples de abertura
+        char c = (char) source.getChar();
+        scanBuffer.append( c );
+        source.advance();
 
-            char c = (char) source.getChar();
+        // verifica se é um caractere gráfico
+        checkGraphicChar( source.getChar() );
+        c = (char) source.getChar();
+
+        // é de escape?
+        if ( c == '\\' ) {
             
-            // se achou outras aspas duplas termina
-            if (c == '\"') {
-                scanBuffer.append('\"');
-                source.advance();
-                break;
-            }
+            scanBuffer.append( scanEscapedChar() );
+            
+            // ou '' (vazio) or ''', ambos inválidos!
+        } else if ( c == '\'' ) {
+            
+            source.advance();
+            c = (char) source.getChar();
 
-            checkGraphicChar(c); // verifica se caracter é valido
-
-            // trata caracteres especiais
-            if (c == '\\') {
-
-                scanBuffer.append(scanEscapedChar());
-
-            } else {
-                // caso contrario so adiciona o caracter
-                scanBuffer.append(c);
+            // três aspas simples seguidas em uma linha
+            if ( c == '\'' ) {
                 source.advance();
             }
 
+            throw error( errorMsg );
+            
+        } else {
+            scanBuffer.append( c );
+            source.advance();
+        }
+
+        // c deverá conter a aspa simples de fechamento
+        c = (char) source.getChar();
+        checkGraphicChar( c );
+
+        // é a aspa dupla de fechamento?
+        if ( c == '\'' ) {
+            
+            scanBuffer.append( c );   // adiciona a aspa simples de fechamento
+            source.advance();
+            
+            // não é, faltou fechar... erro!!!
+        } else {
+            throw error( errorMsg );
         }
 
         return scanBuffer.toString();
