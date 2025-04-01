@@ -175,6 +175,8 @@ public class Scanner {
                             symbol = Symbol.divide;
                             
                         }
+                        
+                        break;
                     
                     // este é o passo 03 da sua implementação, onde deve-se
                     // escanear todos os tokens que representam operadores,
@@ -570,8 +572,12 @@ public class Scanner {
         
         Symbol symbol = symbolMap.get(idString);
 
-        // Retorna o símbolo ou Symbol.unknown se não encontrado
-        return symbol != null ? symbol : Symbol.unknown;
+        if (symbol != null) {
+            return symbol;
+        }
+
+        // Retorna o símbolo.identifier se não encontrado
+        return symbol.identifier;
         
     }
 
