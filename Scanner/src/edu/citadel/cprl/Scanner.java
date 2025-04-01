@@ -324,6 +324,116 @@ public class Scanner {
                         
                         break;
                         
+                    // Implementaçao dos dois pontos ou atribuiçao - Fernanda
+                    // exemplo 8: dois pontos ou atribuição
+                    case ':': // se é um caractere :
+                        
+                        // pode ser que seja o simbolo de atribuição
+                        source.advance();
+                        
+                        // verifica se é um igual
+                        if ( (char) source.getChar() == '=' ) {
+                            
+                            // sabe-se que é um símbolo do tipo lessOrEqual
+                            symbol = Symbol.assign;
+                            
+                            // avança o leitor em um caractere
+                            source.advance();
+                            
+                            // não é um igual, então é somente o operador de dois pontos
+                        } else {
+                            
+                            // sabe-se que é um símbolo do tipo colon
+                            symbol = Symbol.colon;
+                            
+                        }
+                        
+                        break;
+                        
+                    // Implementaçao do abre parenteses - Fernanda
+                    // exemplo 9: abre parenteses
+                    case '(': // se é um caractere (
+                        
+                        // sabe-se que é um símbolo do tipo leftParen
+                        symbol = Symbol.leftParen;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;
+                    
+                    // Implementaçao do fecha parenteses - Fernanda
+                    // exemplo 10: fecha parenteses
+                    case ')': // se é um caractere )
+                        
+                        // sabe-se que é um símbolo do tipo rightParen
+                        symbol = Symbol.rightParen;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;
+                        
+                    // Implementaçao do abre colchetes - Fernanda
+                    // exemplo 11: abre colchetes
+                    case '[': // se é um caractere [
+                        
+                        // sabe-se que é um símbolo do tipo leftBracket
+                        symbol = Symbol.leftBracket;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;
+                        
+                    // Implementaçao do fecha colchetes - Fernanda
+                    // exemplo 12: fecha colchetes
+                    case ']': // se é um caractere ]
+                        
+                        // sabe-se que é um símbolo do tipo rightBracket
+                        symbol = Symbol.rightBracket;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;
+                    
+                    // Implementaçao da virgula - Fernanda
+                    // exemplo 13: virgula
+                    case ',': // se é um caractere ,
+                        
+                        // sabe-se que é um símbolo do tipo comma
+                        symbol = Symbol.comma;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;
+                       
+                    // Implementaçao do ponto e virgula - Fernanda
+                    // exemplo 14: ponto e virgula
+                    case ';': // se é um caractere ;
+                        
+                        // sabe-se que é um símbolo do tipo semicolon
+                        symbol = Symbol.semicolon;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;
+                        
+                    // Implementaçao do ponto - Fernanda
+                    // exemplo 15: ponto
+                    case '.': // se é um caractere .
+                        
+                        // sabe-se que é um símbolo do tipo dot
+                        symbol = Symbol.dot;
+                        
+                        // avança o leitor em um caractere
+                        source.advance();
+                        
+                        break;    
+                        
                     // este é o passo 04 da sua implementação, onde deve-se
                     // escanear os literais de caracteres ('a', 'b' etc) e 
                     // strings ("abc", "x" etc).
@@ -333,11 +443,22 @@ public class Scanner {
                     // implementação do escaneamento de strings, use como base
                     // o escaneamento de caracteres
                     
-                    // <editor-fold defaultstate="collapsed" desc="Implementação do Passo 04">
-                    
-                    // sua implementação aqui
-                    
-                    // </editor-fold>
+                    //aspa simples( inicio de caractere)
+                    case '\'':
+                        //marca commo token do tipo char
+                        symbol = Symbol.charLiteral;
+                        // chama o metodo que le o conteudo
+                        text = scanCharLiteral();
+
+                        break;
+
+                    case '\"':
+                        //marca commo token do tipo st4ring
+                        symbol = Symbol.stringLiteral;
+                        // chama o metodo que le o conteudo
+                        text = scanStringLiteral();
+
+                        break;
                     
                     // erro: caractere inválido
                     default:
@@ -418,16 +539,12 @@ public class Scanner {
         
         // Implementação do identificador de palavras reservadas - Fernanda
         
-        assert Character.isLetter( (char) source.getChar() ) :
-                "scanIntegerLiteral(): check integer literal start for digit at position "
-                + getPosition();
-
         clearScanBuffer();
 
         do {
             scanBuffer.append( (char) source.getChar() );
             source.advance();
-        } while ( Character.isLetter( (char) source.getChar() ) );
+        } while ( Character.isLetter( (char) source.getChar() ) || Character.isDigit((char) source.getChar() ) );
 
         return scanBuffer.toString();
         
@@ -485,17 +602,41 @@ public class Scanner {
         assert (char) source.getChar() == '\"' :
                 "scanStringLiteral(): check for opening double quote (\") at position "
                 + getPosition() + ".";
-        
+
         String errorMsg = "Invalid String literal.";
         clearScanBuffer();
-        
+
         // <editor-fold defaultstate="collapsed" desc="Implementação">
-                    
-        // sua implementação aqui
-        
+        scanBuffer.append('\"');
+        source.advance(); // pula aspas
+        // le o conteudo até outras aspas
+        while (true) {
+            checkEOF(); // checa se do nada o arquivo termina
+
+            char c = (char) source.getChar();
+            // se achou outras aspas duplas termina
+            if (c == '\"') {
+                scanBuffer.append('\"');
+                source.advance();
+                break;
+            }
+
+            checkGraphicChar(c); // verifica se caracter é valido
+
+            // trata caracteres especiais
+            if (c == '\\') {
+
+                scanBuffer.append(scanEscapedChar());
+
+            } else {
+                // caso contrario so adiciona o caracter
+                scanBuffer.append(c);
+                source.advance();
+            }
+
+        }
+
         return scanBuffer.toString();
-        
-        // </editor-fold>
         
     }
 
@@ -513,60 +654,44 @@ public class Scanner {
      */
     private String scanCharLiteral() throws ScannerException, IOException {
         
-        // assume que source.getChar() é a aspa simples de abertura
-        // do literal de Char.
-        assert (char) source.getChar() == '\'' :
-                "scanCharLiteral(): check for opening quote (\') at position "
+        // assume que source.getChar() são as aspas duplas de abertura do
+        // literal de String.
+        assert (char) source.getChar() == '\"' :
+                "scanStringLiteral(): check for opening double quote (\") at position "
                 + getPosition() + ".";
 
-        String errorMsg = "Invalid Char literal.";
+        String errorMsg = "Invalid String literal.";
         clearScanBuffer();
 
-        // insere a aspa simples de abertura
-        char c = (char) source.getChar();
-        scanBuffer.append( c );
-        source.advance();
+        scanBuffer.append('\"');
+        source.advance(); // pula aspas
+        
+        // le o conteudo até outras aspas
+        while (true) {
+            checkEOF(); // checa se do nada o arquivo termina
 
-        // verifica se é um caractere gráfico
-        checkGraphicChar( source.getChar() );
-        c = (char) source.getChar();
+            char c = (char) source.getChar();
+            
+            // se achou outras aspas duplas termina
+            if (c == '\"') {
+                scanBuffer.append('\"');
+                source.advance();
+                break;
+            }
 
-        // é de escape?
-        if ( c == '\\' ) {
-            
-            scanBuffer.append( scanEscapedChar() );
-            
-            // ou '' (vazio) or ''', ambos inválidos!
-        } else if ( c == '\'' ) {
-            
-            source.advance();
-            c = (char) source.getChar();
+            checkGraphicChar(c); // verifica se caracter é valido
 
-            // três aspas simples seguidas em uma linha
-            if ( c == '\'' ) {
+            // trata caracteres especiais
+            if (c == '\\') {
+
+                scanBuffer.append(scanEscapedChar());
+
+            } else {
+                // caso contrario so adiciona o caracter
+                scanBuffer.append(c);
                 source.advance();
             }
 
-            throw error( errorMsg );
-            
-        } else {
-            scanBuffer.append( c );
-            source.advance();
-        }
-
-        // c deverá conter a aspa simples de fechamento
-        c = (char) source.getChar();
-        checkGraphicChar( c );
-
-        // é a aspa dupla de fechamento?
-        if ( c == '\'' ) {
-            
-            scanBuffer.append( c );   // adiciona a aspa simples de fechamento
-            source.advance();
-            
-            // não é, faltou fechar... erro!!!
-        } else {
-            throw error( errorMsg );
         }
 
         return scanBuffer.toString();
